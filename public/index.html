@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Username Tracker</title>
+    <!-- General Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track the availability of Minecraft usernames effortlessly with our Minecraft Username Tracker. Check status, see avatars, and maintain a search history.">
+    <meta name="keywords" content="Minecraft, Username Tracker, Minecraft Username, Check Username Availability, Minecraft Skins, Track Minecraft Names">
+    <meta name="author" content="JojoCraftDE">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Minecraft Username Tracker">
+    <meta property="og:description" content="Check the availability of Minecraft usernames and track your search history. Get status updates and Minecraft skins directly on the page.">
+    <meta property="og:image" content="https://example.com/preview-image.png">
+    <meta property="og:url" content="https://jojocraftde.has-a.page">
+    <meta property="og:site_name" content="Minecraft Username Tracker">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Minecraft Username Tracker">
+    <meta name="twitter:description" content="Easily check Minecraft username availability, see avatars, and maintain a search history.">
+    <meta name="twitter:image" content="https://example.com/preview-image.png">
+
+<!-- Favicon -->
+<link rel="icon" href="https://cravatar.eu/avatar/steve.png" type="image/x-icon">
+
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Minecraft&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Poppins', 'ui-sans-serif', 'system-ui'],
+                        'minecraft': ['Minecraft', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        const backendPorts = [10000, 3000];
+        const usernameInput = document.getElementById('usernameInput');
+        const checkButton = document.getElementById('checkButton');
+        const resultDiv = document.getElementById('result');
+    
+        async function checkBackendStatus() {
+            let backendOnline = false;
+    
+            for (const port of backendPorts) {
+                try {
+                    const response = await fetch(`http://localhost:${port}/health`, { method: 'GET' });
+                    if (response.ok) {
+                        backendOnline = true;
+                        break;
+                    }
+                } catch (error) {
+                    console.warn(`Backend not reachable on port ${port}`);
+                }
+            }
+    
+            if (!backendOnline) {
+                usernameInput.style.display = 'none';
+                checkButton.style.display = 'none';
+                resultDiv.innerHTML = `
+                    <div class="text-red-500 text-center font-semibold p-4 bg-gray-800 rounded-lg">
+                        API Offline: Unable to connect to the server.
+                    </div>
+                `;
+            }
+        }
+    
+        // Run the backend check on page load
+        checkBackendStatus();
+    </script>
+    
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader {
+            border-top-color: #3cfa50;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 5px #5865f2, 0 0 10px #5865f2; }
+            50% { text-shadow: 0 0 20px #5865f2, 0 0 30px #5865f2; }
+        }
+        .discord-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-900 text-gray-100 font-sans p-6">
+    <div class="container mx-auto max-w-2xl">
+        <h1 class="text-4xl font-bold mb-6 text-center text-emerald-400 flex items-center justify-center">
+            <i class="fab fa-minecraft mr-4"></i>
+            Username Tracker
+        </h1>
+        
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl">
+            <div class="flex mb-4">
+                <input 
+                    type="text" 
+                    id="usernameInput" 
+                    placeholder="Enter Minecraft username" 
+                    class="flex-grow p-3 bg-gray-700 text-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                <button 
+                    id="checkButton"
+                    onclick="checkUsername()" 
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 rounded-r-lg transition-colors flex items-center justify-center"
+                >
+                    <i class="fas fa-search" id="searchIcon"></i>
+                    <div id="loader" class="hidden w-5 h-5 border-4 border-transparent rounded-full loader ml-2"></div>
+                </button>
+            </div>
+            
+            <div id="result" class="mt-4"></div>
+            
+            <div id="history" class="mt-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-semibold text-gray-300">Search History</h2>
+                    <button 
+                        onclick="clearHistory()" 
+                        class="text-red-500 hover:text-red-600 transition-colors"
+                    >
+                        <i class="fas fa-trash-alt mr-2"></i>Clear History
+                    </button>
+                </div>
+                <div id="searchHistory" class="grid grid-cols-1 gap-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-900 text-center text-gray-400 py-4 mt-auto">
+        Created by 
+        <a 
+            href="https://jojocraftde.has-a.page" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="text-emerald-500 hover:text-emerald-400 transition-colors ml-1"
+        >
+            JojoCraftDE
+        </a>
+        <a 
+            href="https://discord.gg/VP3G5fyMXn" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="ml-3 text-[#5865f2] hover:text-[#5865f2] discord-glow"
+        >
+            <i class="fab fa-discord"></i>
+        </a>
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const resultDiv = document.getElementById('result');
+        const searchHistoryDiv = document.getElementById('searchHistory');
+        const checkButton = document.getElementById('checkButton');
+        const searchIcon = document.getElementById('searchIcon');
+        const loader = document.getElementById('loader');
+        let searchHistory = JSON.parse(localStorage.getItem('mcUsernameHistory')) || [];
+
+        function renderSearchHistory() {
+            searchHistoryDiv.innerHTML = searchHistory.slice(0, 5).map(item => `
+                <div class="bg-gray-700 p-3 rounded-lg flex items-center">
+                    <img src="${item.skinUrl || 'https://cravatar.eu/avatar/steve.png'}" class="w-12 h-12 mr-4 rounded">
+                    <div>
+                        <p class="font-semibold ${item.isAvailable ? 'text-emerald-400' : 'text-red-500'}">
+                            ${item.username}
+                        </p>
+                        <p class="text-sm text-gray-400">
+                            ${item.isAvailable ? 'Available' : 'Taken'}
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            searchHistory = [];
+            localStorage.removeItem('mcUsernameHistory');
+            renderSearchHistory();
+        }
+
+        async function checkUsername() {
+            const usernameInput = document.getElementById('usernameInput');
+            const username = usernameInput.value.trim();
+
+            // Show loader
+            searchIcon.classList.add('hidden');
+            loader.classList.remove('hidden');
+            checkButton.disabled = true;
+
+            if (!username) {
+                resultDiv.innerHTML = '<p class="text-red-500">Please enter a username</p>';
+                searchIcon.classList.remove('hidden');
+                loader.classList.add('hidden');
+                checkButton.disabled = false;
+                return;
+            }
+
+            try {
+                const response = await fetch('/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username })
+                });
+                const data = await response.json();
+                
+                // Get skin URL if username is taken
+                let skinUrl = '/default-skin.png';
+                if (!data.isAvailable) {
+                    try {
+                        const skinResponse = await fetch(`https://mc-heads.net/avatar/${username}`);
+                        skinUrl = skinResponse.url;
+                    } catch (error) {
+                        console.error('Could not fetch skin');
+                    }
+                }
+
+                // Update result display
+                resultDiv.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <img src="${skinUrl}" class="w-20 h-20 rounded-lg">
+                        <div>
+                            <p class="text-xl font-semibold">Username: ${data.username}</p>
+                            <p class="text-lg ${data.isAvailable ? 'text-emerald-500' : 'text-red-500'}">
+                                ${data.isAvailable ? 'AVAILABLE' : 'TAKEN'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+
+                // Update search history
+                searchHistory.unshift({
+                    username: data.username,
+                    isAvailable: data.isAvailable,
+                    skinUrl: skinUrl
+                });
+                searchHistory = searchHistory.slice(0, 5);
+                localStorage.setItem('mcUsernameHistory', JSON.stringify(searchHistory));
+                renderSearchHistory();
+
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="text-red-500">Error checking username</p>';
+            } finally {
+                // Hide loader
+                searchIcon.classList.remove('hidden');
+                loader.classList.add('hidden');
+                checkButton.disabled = false;
+            }
+        }
+
+        // Render initial history
+        renderSearchHistory();
+
+        // WebSocket for live updates
+        socket.on('usernameStatus', (data) => {
+            console.log('Username status update:', data);
+        });
+    </script>
+</body>
+</html>

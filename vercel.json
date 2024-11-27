@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "server.js"
+        }
+    ],
+    "env": {
+        "DISCORD_WEBHOOK_URL": "@minecraft_username_discord_webhook"
+    },
+    "github": {
+        "silent": true
+    }
+}
